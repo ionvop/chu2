@@ -1,0 +1,232 @@
+{
+    "version": "Live2D Cubism 2.0",
+    "model": "chu2_casual.moc",
+    "physics": "chu2_casual.physics.json",
+    "textures": [
+        "chu2_casual.1024/texture_00.png",
+        "chu2_casual.1024/texture_01.png"
+    ],
+    "expressions": [
+        {
+            "name": "default",
+            "file": "expressions/default.exp.json"
+        },
+        {
+            "name": "angry01",
+            "file": "expressions/angry01.exp.json"
+        },
+        {
+            "name": "cry01",
+            "file": "expressions/cry01.exp.json"
+        },
+        {
+            "name": "idle01",
+            "file": "expressions/idle01.exp.json"
+        },
+        {
+            "name": "kime01",
+            "file": "expressions/kime01.exp.json"
+        },
+        {
+            "name": "sad01",
+            "file": "expressions/sad01.exp.json"
+        },
+        {
+            "name": "serious01",
+            "file": "expressions/serious01.exp.json"
+        },
+        {
+            "name": "shame01",
+            "file": "expressions/shame01.exp.json"
+        },
+        {
+            "name": "smile01",
+            "file": "expressions/smile01.exp.json"
+        },
+        {
+            "name": "smile02",
+            "file": "expressions/smile02.exp.json"
+        },
+        {
+            "name": "surprised01",
+            "file": "expressions/surprised01.exp.json"
+        }
+    ],
+    "motions": {
+        "idle": [
+            {
+                "file": "motions/idle01.mtn"
+            }
+        ],
+        "ando": [
+            {
+                "file": "motions/ando01.mtn"
+            }
+        ],
+        "angry": [
+            {
+                "file": "motions/angry01.mtn"
+            },
+            {
+                "file": "motions/angry02.mtn"
+            },
+            {
+                "file": "motions/angry03.mtn"
+            }
+        ],
+        "awate": [
+            {
+                "file": "motions/awate01.mtn"
+            }
+        ],
+        "bye": [
+            {
+                "file": "motions/bye01.mtn"
+            }
+        ],
+        "cry": [
+            {
+                "file": "motions/cry01.mtn"
+            },
+            {
+                "file": "motions/cry02.mtn"
+            }
+        ],
+        "eeto": [
+            {
+                "file": "motions/eeto01.mtn"
+            }
+        ],
+        "kime": [
+            {
+                "file": "motions/kime01.mtn"
+            },
+            {
+                "file": "motions/kime02.mtn"
+            }
+        ],
+        "nf": [
+            {
+                "file": "motions/nf01.mtn"
+            },
+            {
+                "file": "motions/nf02.mtn"
+            },
+            {
+                "file": "motions/nf03.mtn"
+            },
+            {
+                "file": "motions/nf04.mtn"
+            },
+            {
+                "file": "motions/nf05.mtn"
+            },
+            {
+                "file": "motions/nf_left01.mtn"
+            },
+            {
+                "file": "motions/nf_right01.mtn"
+            }
+        ],
+        "nnf": [
+            {
+                "file": "motions/nnf01.mtn"
+            },
+            {
+                "file": "motions/nnf02.mtn"
+            },
+            {
+                "file": "motions/nnf03.mtn"
+            },
+            {
+                "file": "motions/nnf04.mtn"
+            },
+            {
+                "file": "motions/nnf05.mtn"
+            },
+            {
+                "file": "motions/nnf_left01.mtn"
+            },
+            {
+                "file": "motions/nnf_right01.mtn"
+            }
+        ],
+        "sad": [
+            {
+                "file": "motions/sad01.mtn"
+            },
+            {
+                "file": "motions/sad02.mtn"
+            }
+        ],
+        "serious": [
+            {
+                "file": "motions/serious01.mtn"
+            },
+            {
+                "file": "motions/serious02.mtn"
+            }
+        ],
+        "shame": [
+            {
+                "file": "motions/shame01.mtn"
+            },
+            {
+                "file": "motions/shame02.mtn"
+            }
+        ],
+        "sleep": [
+            {
+                "file": "motions/sleep01.mtn"
+            },
+            {
+                "file": "motions/sleep02.mtn"
+            }
+        ],
+        "smile": [
+            {
+                "file": "motions/smile01.mtn"
+            },
+            {
+                "file": "motions/smile02.mtn"
+            },
+            {
+                "file": "motions/smile03.mtn"
+            },
+            {
+                "file": "motions/smile04.mtn"
+            }
+        ],
+        "surprised": [
+            {
+                "file": "motions/surprised01.mtn"
+            }
+        ],
+        "sys-urafes-PR-": [
+            {
+                "file": "motions/sys-urafes-PR-001.mtn"
+            },
+            {
+                "file": "motions/sys-urafes-PR-002.mtn"
+            },
+            {
+                "file": "motions/sys-urafes-PR-003.mtn"
+            },
+            {
+                "file": "motions/sys-urafes-PR-004.mtn"
+            },
+            {
+                "file": "motions/sys-urafes-PR-005.mtn"
+            },
+            {
+                "file": "motions/sys-urafes-PR-006.mtn"
+            },
+            {
+                "file": "motions/sys-urafes-PR-007.mtn"
+            },
+            {
+                "file": "motions/sys-urafes-PR-008.mtn"
+            }
+        ]
+    }
+}
