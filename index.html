@@ -1,0 +1,41 @@
+<html>
+    <head>
+        <title>
+
+        </title>
+        <base href="./">
+        <link rel="stylesheet" href="style.css">
+        <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+        </style>
+    </head>
+    <body>
+        <div style="
+            box-sizing: border-box;
+            padding: 1rem;
+            height: 100%;">
+            <canvas style="
+                display: block; 
+                width: 100%;
+                height: 100%;"
+                id="canvasLive2d">
+            </canvas>
+        </div>
+        <script src="lib/pixi.min.js"></script>
+        <script src="lib/live2d.min.js"></script>
+        <script src="lib/cubism2.min.js"></script>
+        <script src="script.js"></script>
+        <script>
+            let canvasLive2d = document.getElementById("canvasLive2d");
+
+            let chu2 = new Waifu(canvasLive2d, "assets/live2d/chu2/chu2_casual.model.json", {
+                scale: 0.3,
+                x: 0.5,
+                y: 0.5
+            });
+            
+            chu2.init();
+        </script>
+    </body>
+</html>
