@@ -6,12 +6,15 @@ class Waifu {
         this.options = {
             scale: options.scale || 0.3,
             x: options.x || 0.5,
-            y: options.y || 0.5
+            y: options.y || 0.5,
+            print_move: options.print_move || false
         };
 
         this.override = {
             PARAM_MOUTH_OPEN_Y: null
         };
+
+        this._mouthMultiplier = null;
     }
 
     async init() {
@@ -90,11 +93,13 @@ class Waifu {
                 if (t < 1) {
                     this.override[param] = from + (target - from) * easingFunction(t);
                     
-                    console.log({
-                        t: t,
-                        param: param,
-                        value: this.model.internalModel.coreModel.getParamFloat(param)
-                    });
+                    if (this.options.print_move == true) {
+                        console.log({
+                            t: t,
+                            param: param,
+                            value: this.model.internalModel.coreModel.getParamFloat(param)
+                        });
+                    }
                     
                     requestAnimationFrame(step);
                     return;
@@ -102,11 +107,13 @@ class Waifu {
 
                 this.override[param] = target;
 
-                console.log({
-                    t: t,
-                    param: param,
-                    value: this.model.internalModel.coreModel.getParamFloat(param)
-                });
+                if (this.options.print_move == true) {
+                    console.log({
+                        t: t,
+                        param: param,
+                        value: this.model.internalModel.coreModel.getParamFloat(param)
+                    });
+                }
 
                 resolve();
             }
@@ -167,23 +174,78 @@ class Waifu {
         }
     }
 
-    yap(strength = 0.5, speed = 0.5) {
+    yap(strength = 0.5, speed = 0.5, lipsync = false) {
         let yap = true;
 
         (async () => {
-            let mouthForm;
-            
-            while (yap) {
-                mouthForm = this.move("PARAM_MOUTH_FORM_01", Math.random() * 5 - 2.5, 0.3 / speed);
-                await this.move("PARAM_MOUTH_OPEN_Y", strength, 0.1 / speed);
-                await this.move("PARAM_MOUTH_OPEN_Y", 0, 0.1 / speed);
+            let tick = async () => {
+                let temp = this.model.internalModel.coreModel.getParamFloat("PARAM_MOUTH_FORM_01");
+                
+                if (lipsync) {
+                    await this.move("PARAM_MOUTH_OPEN_Y", this._mouthMultiplier * (2 - this._mouthMultiplier), 0.1);
+                } else {
+                    this.move("PARAM_MOUTH_FORM_01", Math.max(-1.5, Math.min(temp, 1.5)) + (Math.random() * 2 - 1), 0.1 / speed);
+                    await this.move("PARAM_MOUTH_OPEN_Y", strength, 0.1 / speed);
+                    this.move("PARAM_MOUTH_FORM_01", temp, 0.1 / speed);
+                    await this.move("PARAM_MOUTH_OPEN_Y", 0, 0.1 / speed);
+                    this.override["PARAM_MOUTH_FORM_01"] = null;
+                }
+
+                if (yap == false) {
+                    this.override["PARAM_MOUTH_FORM_01"] = null;
+                    this.override["PARAM_MOUTH_OPEN_Y"] = null;
+                    return;
+                }
+
+                requestAnimationFrame(tick);
             }
 
-            await mouthForm;
-            this.override["PARAM_MOUTH_FORM_01"] = null;
-            this.override["PARAM_MOUTH_OPEN_Y"] = null;
+            tick();
         })();
 
         return () => yap = false;
+    }
+
+    async tts(text, motion, index) {
+        console.log("Generating audio...");
+        let timestamp = Date.now();
+        let response = await fetch(`https://ionvop-chu2-rvc-api.hf.space/speak?text=${encodeURIComponent(text)}`);
+        response = await response.blob();
+        let audioURL = URL.createObjectURL(response);
+        let audio = new Audio(audioURL);
+        await new Promise(resolve => audio.oncanplaythrough = () => resolve());
+        console.log(`Audio generated in ${(Date.now() - timestamp) / 1000}s`);
+        let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let source = audioCtx.createMediaElementSource(audio);
+        let analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
+        let bufferLength = analyser.frequencyBinCount;
+        let dataArray = new Uint8Array(bufferLength);
+        source.connect(analyser);
+        analyser.connect(audioCtx.destination);
+        let animationId;
+
+        let updateLipsync = () => {
+            analyser.getByteTimeDomainData(dataArray);
+            let sumSquares = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                let val = (dataArray[i] - 128) / 128;
+                sumSquares += val * val;
+            }
+
+            let rms = Math.sqrt(sumSquares / bufferLength);
+            this._mouthMultiplier = rms;
+            animationId = requestAnimationFrame(updateLipsync);
+        }
+
+        let stop = this.yap(1, 1, true);
+        this.model.motion(motion, index);
+        await audio.play();
+        audioCtx.resume();
+        updateLipsync();
+        await new Promise(resolve => setTimeout(resolve, (audio.duration - 1) * 1000));
+        cancelAnimationFrame(animationId);
+        stop();
     }
 }
