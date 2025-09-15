@@ -8,19 +8,84 @@
         <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
+            @media (orientation: portrait) {
+                #panel {
+                    width: 70% !important;
+                }
+            }
         </style>
     </head>
     <body>
         <div style="
+            position: relative;
             box-sizing: border-box;
-            padding: 1rem;
-            height: 100%;">
+            height: 100%;
+            background-image: url('assets/bg00499.png');
+            background-size: cover;
+            background-position: center;">
+            <div style="
+                position: absolute;
+                top: 0rem;
+                left: 0rem;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);">
+            </div>
             <canvas style="
-                display: block; 
+                position: absolute;
+                display: block;
+                top: 0rem;
+                left: 0rem;
                 width: 100%;
                 height: 100%;"
                 id="canvasLive2d">
             </canvas>
+            <div style="
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+                bottom: 1rem;
+                width: 50%;
+                height: 7rem;
+                background-color: rgba(255, 255, 255, 0.85);
+                border-radius: 12.5051px;
+                box-shadow: rgba(0, 0, 0, 0.2) 0px 4.34959px 4.34959px;
+                padding: 19.0294px;
+                color: rgb(80, 80, 80);
+                font-size: 16.311px;
+                font-weight: 600;
+                user-select: none;
+                font-family: monospace;"
+                id="panel">
+                <div style="
+                    display: flex;
+                    align-items: center;
+                    position: absolute;
+                    left: 0rem;
+                    top: -2rem;
+                    width: 30%;
+                    height: 2rem;
+                    background-color: rgb(255, 59, 114);
+                    border-style: solid;
+                    border-color: rgb(255, 255, 255);
+                    border-width: 1.44279px;
+                    border-radius: 1rem 0px 0px 1rem;
+                    padding: 0px 18.7563px;
+                    color: rgb(255, 255, 255);
+                    font-size: 16.2314px;
+                    font-weight: 600;
+                    text-wrap: nowrap;
+                    overflow: hidden;
+                    line-height: 33.1842px;"
+                    id="panelName">
+                    CHU²
+                </div>
+                <div style="
+                    height: 100%;"
+                    id="panelText">
+                    
+                </div>
+            </div>
         </div>
         <script src="lib/pixi.min.js"></script>
         <script src="lib/live2d.min.js"></script>
@@ -28,6 +93,9 @@
         <script src="script.js"></script>
         <script>
             let canvasLive2d = document.getElementById("canvasLive2d");
+            let panelName = document.getElementById("panelName");
+            let panelText = document.getElementById("panelText");
+            let messages = [];
 
             let chu2 = new Waifu(canvasLive2d, "assets/live2d/chu2/chu2_casual.model.json", {
                 scale: 0.3,
@@ -36,6 +104,118 @@
             });
             
             chu2.init();
+            setUserChat();
+
+            function setUserChat() {
+                panelName.textContent = "You";
+                chu2.focus = true;
+
+                panelText.innerHTML = /*html*/`
+                    <textarea style="
+                        width: 100%;
+                        height: 100%;
+                        border: none;
+                        resize: none;
+                        outline: none;
+                        background-color: transparent;
+                        color: rgb(80, 80, 80);
+                        font-size: 16.311px;
+                        font-weight: 600;"
+                        placeholder="Type something..."
+                        id="inputChat"></textarea>
+                `;
+
+                let inputChat = document.getElementById("inputChat");
+
+                inputChat.addEventListener("keydown", event => {
+                    if (event.key == "Enter") {
+                        chat(inputChat.value);
+                    }
+                });
+            }
+
+            async function chat(message) {
+                panelName.textContent = "CHU²";
+                panelText.innerHTML = "Thinking...";
+
+                messages.push({
+                    role: "user",
+                    content: message
+                });
+
+                let response = await fetch("api/chat/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        messages: messages,
+                        debug: true
+                    })
+                });
+
+                response = await response.json();
+                console.log(response);
+                let dialogue = response.message.messages;
+
+                messages.push({
+                    role: "assistant",
+                    content: JSON.stringify(dialogue)
+                });
+
+                let index = 0;
+                let charIndex = 0;
+                let typing = false;
+                let typingInterval;
+
+                async function typeLine(line) {
+                    chu2.focus = false;
+                    
+                    let motionMap = {
+                        panic: "awate",
+                        thinking: "eeto",
+                        agree: "kime",
+                        normal: "nf",
+                        indifferent: "nnf"
+                    };
+
+                    let motion = motionMap[dialogue[index].motion] || dialogue[index].motion;
+                    await chu2.model.motion(motion, undefined, 3);
+                    typing = true;
+                    panelText.textContent = "";
+                    charIndex = 0;
+
+                    typingInterval = setInterval(() => {
+                        panelText.textContent += line[charIndex];
+                        charIndex++;
+
+                        if (charIndex >= line.length) {
+                            clearInterval(typingInterval);
+                            typing = false;
+                        }
+                    }, 40);
+                }
+
+                function showNext() {
+                    if (typing) {
+                        clearInterval(typingInterval);
+                        panelText.textContent = dialogue[index].text;
+                        typing = false;
+                    } else {
+                        index++;
+                        if (index < dialogue.length) {
+                            typeLine(dialogue[index].text);
+                        } else {
+                            setUserChat();
+                            panelText.removeEventListener("click", showNext);
+                        }
+                    }
+                }
+
+                index = 0;
+                typeLine(dialogue[index].text);
+                panelText.addEventListener("click", showNext);
+            }
         </script>
     </body>
 </html>
