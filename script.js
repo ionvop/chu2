@@ -15,6 +15,7 @@ class Waifu {
         };
 
         this._mouthMultiplier = null;
+        this._stopSpeech = new CustomEvent("stop-speech", { detail: { index: this._index } });
     }
 
     async init() {
@@ -246,6 +247,49 @@ class Waifu {
         audioCtx.resume();
         updateLipsync();
         await new Promise(resolve => setTimeout(resolve, (audio.duration - 1) * 1000));
+        cancelAnimationFrame(animationId);
+        stop();
+    }
+
+    async lipsync(audioURL) {
+        let audio = new Audio(audioURL);
+        await new Promise(resolve => audio.oncanplaythrough = () => resolve());
+        let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let source = audioCtx.createMediaElementSource(audio);
+        let analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
+        let bufferLength = analyser.frequencyBinCount;
+        let dataArray = new Uint8Array(bufferLength);
+        source.connect(analyser);
+        analyser.connect(audioCtx.destination);
+        let animationId;
+
+        let updateLipsync = () => {
+            analyser.getByteTimeDomainData(dataArray);
+            let sumSquares = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                let val = (dataArray[i] - 128) / 128;
+                sumSquares += val * val;
+            }
+
+            let rms = Math.sqrt(sumSquares / bufferLength);
+            this._mouthMultiplier = rms;
+            animationId = requestAnimationFrame(updateLipsync);
+        }
+
+        let stop = this.yap(1, 1, true);
+        await audio.play();
+        audioCtx.resume();
+        updateLipsync();
+
+        audio.addEventListener("stop-speech", () => {
+            audio.pause();
+            audio.currentTime = 0;
+            audio.dispatchEvent("ended");
+        });
+
+        await new Promise(resolve => audio.onended = () => resolve());
         cancelAnimationFrame(animationId);
         stop();
     }
