@@ -20,7 +20,8 @@ class Waifu {
     async init() {
         this.app = new PIXI.Application({
             view: this.canvas,
-            resizeTo: this.canvas
+            resizeTo: this.canvas,
+            transparent: true
         });
 
         this.model = await PIXI.live2d.Live2DModel.from(this.path, {
