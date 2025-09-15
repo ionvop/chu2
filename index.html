@@ -106,6 +106,18 @@
             chu2.init();
             setUserChat();
 
+            //loop bgm
+            let bgm = new Audio("assets/29_Normal_2.mp3");
+            bgm.loop = true;
+            bgm.volume = 0.5;
+            
+            let bgmPlay = () => {
+                bgm.play();
+                document.removeEventListener("click", bgmPlay);
+            };
+
+            document.addEventListener("click", bgmPlay);
+
             function setUserChat() {
                 panelName.textContent = "You";
                 chu2.focus = true;
@@ -158,6 +170,15 @@
                 console.log(response);
                 let dialogue = response.message.messages;
 
+                for (let message of dialogue) {
+                    console.log(`Generating audio... (${dialogue.indexOf(message) + 1}/${dialogue.length})`);
+                    panelText.innerHTML = "Generating audio... (" + (dialogue.indexOf(message) + 1) + "/" + dialogue.length + ")";
+                    let response = await fetch("https://ionvop-chu2-rvc-api.hf.space/speak?text=" + encodeURIComponent(message.speech));
+                    response = await response.blob();
+                    let audioURL = URL.createObjectURL(response);
+                    dialogue[dialogue.indexOf(message)].audio = audioURL;
+                }
+
                 messages.push({
                     role: "assistant",
                     content: JSON.stringify(dialogue)
@@ -170,6 +191,8 @@
 
                 async function typeLine(line) {
                     chu2.focus = false;
+                    chu2.stare();
+                    chu2.lipsync(dialogue[index].audio);
                     
                     let motionMap = {
                         panic: "awate",
