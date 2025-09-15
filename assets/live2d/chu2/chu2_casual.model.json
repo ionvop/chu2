@@ -69,9 +69,6 @@
             },
             {
                 "file": "motions/angry02.mtn"
-            },
-            {
-                "file": "motions/angry03.mtn"
             }
         ],
         "awate": [
@@ -192,9 +189,6 @@
             },
             {
                 "file": "motions/smile03.mtn"
-            },
-            {
-                "file": "motions/smile04.mtn"
             }
         ],
         "surprised": [
