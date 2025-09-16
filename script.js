@@ -26,7 +26,8 @@ class Waifu {
         });
 
         this.model = await PIXI.live2d.Live2DModel.from(this.path, {
-            autoInteract: false
+            autoInteract: false,
+            motionPreload: 'ALL'
         });
 
         this.app.stage.addChild(this.model);
@@ -252,6 +253,15 @@ class Waifu {
     }
 
     async lipsync(audioURL) {
+        if (this._currentAudio) {
+            this._currentAudio.pause();
+            this._currentAudio.currentTime = 0;
+        }
+        if (this._cancelAnimation) {
+            this._cancelAnimation();
+            this._cancelAnimation = null;
+        }
+
         let audio = new Audio(audioURL);
         await new Promise(resolve => audio.oncanplaythrough = () => resolve());
         let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -282,13 +292,8 @@ class Waifu {
         await audio.play();
         audioCtx.resume();
         updateLipsync();
-
-        audio.addEventListener("stop-speech", () => {
-            audio.pause();
-            audio.currentTime = 0;
-            audio.dispatchEvent("ended");
-        });
-
+        this._currentAudio = audio;
+        this._cancelAnimation = () => cancelAnimationFrame(animationId);
         await new Promise(resolve => audio.onended = () => resolve());
         cancelAnimationFrame(animationId);
         stop();
